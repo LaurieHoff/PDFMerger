@@ -2,6 +2,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { PDFDocument } from 'pdf-lib';
 
 interface CliArgs {
   inputFiles: string[];
@@ -26,7 +27,42 @@ function parseArgs(): CliArgs {
   const inputFiles = args.slice(0, outputIndex);
   const outputFile = args[outputIndex + 1];
   
+  // Validate input files exist and are PDFs
+  for (const file of inputFiles) {
+    if (!fs.existsSync(file)) {
+      console.error(`Error: Input file does not exist: ${file}`);
+      process.exit(1);
+    }
+    if (!file.toLowerCase().endsWith('.pdf')) {
+      console.error(`Error: File must be a PDF: ${file}`);
+      process.exit(1);
+    }
+  }
+  
+  // Validate output file extension
+  if (!outputFile.toLowerCase().endsWith('.pdf')) {
+    console.error('Error: Output file must have .pdf extension');
+    process.exit(1);
+  }
+  
   return { inputFiles, outputFile };
+}
+
+async function mergePdfs(inputFiles: string[], outputFile: string): Promise<void> {
+  const mergedPdf = await PDFDocument.create();
+  
+  for (const inputFile of inputFiles) {
+    console.log(`Processing: ${inputFile}`);
+    const pdfBytes = fs.readFileSync(inputFile);
+    const pdf = await PDFDocument.load(pdfBytes);
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+  
+  const pdfBytes = await mergedPdf.save();
+  fs.writeFileSync(outputFile, pdfBytes);
+  console.log(`✅ Successfully merged ${inputFiles.length} PDFs into ${outputFile}`);
 }
 
 async function main() {
@@ -35,6 +71,8 @@ async function main() {
     console.log(`Merging ${inputFiles.length} PDF files...`);
     console.log('Input files:', inputFiles.join(', '));
     console.log('Output file:', outputFile);
+    
+    await mergePdfs(inputFiles, outputFile);
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);
