@@ -11,6 +11,12 @@
   "keywords": ["pdf", "merge", "tool", "cli"],
   "author": "LaurieHoff",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "ts-node": "^10.9.1",
+    "@types/node": "^18.15.11"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
 }
