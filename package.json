@@ -11,9 +11,13 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts"
   },
-  "keywords": ["pdf", "merge", "tool", "cli"],
-  "author": "LaurieHoff",
+  "keywords": ["pdf", "merge", "tool", "cli", "pdf-merger", "command-line"],
+  "author": "LaurieHoff <ggoodivise@hotmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LaurieHoff/PDFMerger.git"
+  },
   "devDependencies": {
     "typescript": "^5.0.4",
     "ts-node": "^10.9.1",
