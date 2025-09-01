@@ -47,6 +47,13 @@ function parseArgs(): CliArgs {
       console.error(`Error: File must be a PDF: ${file}`);
       process.exit(1);
     }
+    
+    // Check file size (warn if very large)
+    const stats = fs.statSync(file);
+    const fileSizeMB = stats.size / (1024 * 1024);
+    if (fileSizeMB > 100) {
+      console.warn(`Warning: Large file detected (${fileSizeMB.toFixed(1)}MB): ${file}`);
+    }
   }
   
   // Validate output file extension
@@ -55,24 +62,49 @@ function parseArgs(): CliArgs {
     process.exit(1);
   }
   
+  // Check if output file already exists
+  if (fs.existsSync(outputFile)) {
+    console.warn(`Warning: Output file already exists and will be overwritten: ${outputFile}`);
+  }
+  
+  // Validate output directory exists
+  const outputDir = path.dirname(outputFile);
+  if (!fs.existsSync(outputDir)) {
+    console.error(`Error: Output directory does not exist: ${outputDir}`);
+    process.exit(1);
+  }
+  
   return { inputFiles, outputFile };
 }
 
 async function mergePdfs(inputFiles: string[], outputFile: string): Promise<void> {
   const mergedPdf = await PDFDocument.create();
+  let totalPages = 0;
   
-  for (const inputFile of inputFiles) {
-    console.log(`Processing: ${inputFile}`);
-    const pdfBytes = fs.readFileSync(inputFile);
-    const pdf = await PDFDocument.load(pdfBytes);
-    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+  for (let i = 0; i < inputFiles.length; i++) {
+    const inputFile = inputFiles[i];
+    const progress = `(${i + 1}/${inputFiles.length})`;
+    console.log(`Processing ${progress}: ${inputFile}`);
     
-    copiedPages.forEach((page) => mergedPdf.addPage(page));
+    try {
+      const pdfBytes = fs.readFileSync(inputFile);
+      const pdf = await PDFDocument.load(pdfBytes);
+      const pageCount = pdf.getPageCount();
+      const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+      
+      copiedPages.forEach((page) => mergedPdf.addPage(page));
+      totalPages += pageCount;
+      console.log(`  Added ${pageCount} pages`);
+    } catch (error) {
+      console.error(`  ❌ Failed to process ${inputFile}: ${error}`);
+      process.exit(1);
+    }
   }
   
+  console.log('Saving merged PDF...');
   const pdfBytes = await mergedPdf.save();
   fs.writeFileSync(outputFile, pdfBytes);
-  console.log(`✅ Successfully merged ${inputFiles.length} PDFs into ${outputFile}`);
+  console.log(`✅ Successfully merged ${inputFiles.length} PDFs (${totalPages} pages) into ${outputFile}`);
 }
 
 async function main() {
