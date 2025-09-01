@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A simple tool to merge multiple PDF files",
   "main": "dist/index.js",
+  "bin": {
+    "pdf-merger": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

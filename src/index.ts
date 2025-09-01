@@ -12,10 +12,20 @@ interface CliArgs {
 function parseArgs(): CliArgs {
   const args = process.argv.slice(2);
   
-  if (args.length < 3) {
+  if (args.length < 3 || args.includes('--help') || args.includes('-h')) {
     console.log('PDF Merger v1.0.0');
-    console.log('Usage: npm start <input1.pdf> <input2.pdf> ... --output <output.pdf>');
-    process.exit(1);
+    console.log('A simple tool to merge multiple PDF files');
+    console.log('');
+    console.log('Usage:');
+    console.log('  npm start <input1.pdf> <input2.pdf> ... --output <output.pdf>');
+    console.log('');
+    console.log('Example:');
+    console.log('  npm start doc1.pdf doc2.pdf doc3.pdf --output merged.pdf');
+    console.log('');
+    console.log('Options:');
+    console.log('  --output <file>  Output PDF file (required)');
+    console.log('  --help, -h       Show this help message');
+    process.exit(args.includes('--help') || args.includes('-h') ? 0 : 1);
   }
   
   const outputIndex = args.indexOf('--output');
