@@ -1,0 +1,16 @@
+{
+  "name": "pdf-merger",
+  "version": "1.0.0",
+  "description": "A simple tool to merge multiple PDF files",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": ["pdf", "merge", "tool", "cli"],
+  "author": "LaurieHoff",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
